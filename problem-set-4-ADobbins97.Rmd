@@ -9,11 +9,38 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
-library()
+library(gt)
+
+nc09 <- read_csv(file = "ps_4_elections-poll-nc09-3.csv", 
+                  col_types =  cols(
+                   .default = col_character(),
+                   turnout_scale = col_double(),
+                   turnout_score = col_double(),
+                   w_LV = col_double(),
+                   w_RV = col_double(),
+                   final_weight = col_double(),
+                   timestamp = col_datetime(format = "")))
+
 ```
+
 
 ```{r}
+nc09 %>% 
+  select(response, race_eth, final_weight) %>%
+  group_by(response, race_eth) %>% 
+  summarize(total = sum(final_weight)) %>% 
+  filter(race_eth != "[DO NOT READ] Don't know/Refused", "3") %>% 
+  spread(key = response, value = total) %>% 
+  mutate(all = Dem + Rep + Und) %>% 
+    mutate(Dem = Dem/all) %>% 
+    mutate(Rep = Rep/all) %>% 
+    mutate(Und = Und/all) %>% 
+    select(-all)
+
 
 
 
 ```
+
+Question 1:
+
