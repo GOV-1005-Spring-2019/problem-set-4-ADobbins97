@@ -47,13 +47,15 @@ nc_09 <-
 
 Dem_Support <- 
   nc09 %>% 
-  count(response == "Dem") %>% 
-  filter(`response == "Dem"` == TRUE)
+  filter(response == "Dem") %>% 
+  nrow()
 
-RepCount <- nc09 %>% count(response =="Rep") %>% 
-  filter(`response == "Rep"` == TRUE)
-UndCount <- nc09 %>% count(response == "Und") %>% 
-  filter(`response == "Und"` == TRUE)
+RepCount <- nc09 %>% 
+  filter(response == "Rep") %>% 
+  nrow()
+UndCount <- nc09 %>%  
+  filter(response == "Und") %>% 
+  nrow()
 
 GenderDiff <- 
   nc09 %>%
@@ -67,8 +69,8 @@ White <-
   filter(race_eth == "White", race_eth != file_race_black) %>%
   nrow()
   
-
-  
+dem_time <- nc09 %>% filter(response == "Dem") %>%  slice(1) %>%  pull(timestamp)
+rep_time <- nc09 %>% filter(response == "Rep") %>%  slice(1) %>%  pull(timestamp)
 
 ```
 
@@ -82,7 +84,7 @@ There are two gender variables `gender` and `gender_combined`. There are `r Gend
 
 There are `r White` respondents listed as "White" under `race_eth` who are not listed as "White" under `file_race_black`.
 
-The first response of Rep came `r ` minutes (rounded to the nearest minute) before the first response of Dem.
+The first response of Rep came `r round(rep_time - dem_time)` minutes (rounded to the nearest minute) before the first response of Dem.
 
 
 
@@ -93,17 +95,20 @@ The first response of Rep came `r ` minutes (rounded to the nearest minute) befo
 
 nc_09 %>% 
   gt() %>% 
-  tab_header(title = "North Carolina's Voting Distribution by Race",
-             subtitle = "Subtitle") %>% 
+  tab_header(title = "North Carolina's 9th Congressional District Voting Distribution by Race and Party")%>% 
   cols_label(
     race_eth = "Ethnicity",
     Dem = "DEM.",
     Rep = "REP.",
     Und = "UND."
     ) %>%
-  fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0)
+  fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>% 
+  na_if(0) %>% 
+  fmt_missing(columns = vars(Und), rows = 4)
 
 ```
+
+
 
 **Question 3:**
 
@@ -124,11 +129,6 @@ nc_educ %>%
   labs(title = "More Educated Matter Less in North Carolina 9th", subtitle = "Poll gives more weight to people who are less likely to participate in polls", caption = "New York Times Upshot/Siena College 2018 live polls")+
   ylab("Weight Given to Respondent in Calculating Poll Results")+
   xlab("")
-  
- 
-  
-  
-
 
 ```
 
@@ -138,7 +138,9 @@ Question 4:
 
 #Question 4
 
+
+
 ```
 
 Colleagues:
-Mike Silva, Adiya Abdilkhay, Seeam Noor, Christopher Onestna, Charlie Flood, Albert Shin
+Mike Silva, Adiya Abdilkhay, Seeam Noor, Christopher Onesti, Charlie Flood, Albert Shin
