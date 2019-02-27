@@ -138,7 +138,23 @@ Question 4:
 
 #Question 4
 
+q4_graph <-
+  nc09 %>% 
+  select(educ, likely) %>% 
+  filter(educ != "[DO NOT READ] Refused", likely != "[DO NOT READ] Don't know/Refused") %>%
+  mutate(educ = fct_relevel(educ, "Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree")) %>% 
+  mutate(likely = fct_relevel(likely, "Not at all likely", "Not very likely","Somewhat likely", "Very likely", "Almost certain", "Already voted"))
 
+
+q4_graph %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = likely, fill = educ), alpha = .7)+
+  coord_flip()+
+  ylab("Citizens (number)")+
+  xlab("Self-Reported Odds of Voting")+
+  labs(title = "Self-Reported Odds of Voter Participation with Respect to Education", 
+       subtitle = "An exploration of education's effects on political participation")+
+  annotate(geom = "text", x = .85, y = 90, size = 2.5, label = "<- Surprisingly honest feedback about voting intentions")
 
 ```
 
