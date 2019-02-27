@@ -6,10 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 library(gt)
+library(dplyr)
+library(relevel)
 
 nc09 <- read_csv(file = "ps_4_elections-poll-nc09-3.csv", 
                   col_types =  cols(
@@ -25,22 +27,67 @@ nc09 <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
 
 
 ```{r}
-nc09 %>% 
-  select(response, race_eth, final_weight) %>%
-  group_by(response, race_eth) %>% 
-  summarize(total = sum(final_weight)) %>% 
-  filter(race_eth != "[DO NOT READ] Don't know/Refused", "3") %>% 
-  spread(key = response, value = total) %>% 
-  mutate(all = Dem + Rep + Und) %>% 
-    mutate(Dem = Dem/all) %>% 
-    mutate(Rep = Rep/all) %>% 
-    mutate(Und = Und/all) %>% 
-    select(-all)
+nc_09 <-
+  nc09 %>% 
+    select(response, race_eth, final_weight) %>%
+    group_by(response, race_eth) %>% 
+    summarize(total = sum(final_weight)) %>% 
+    filter(race_eth != "[DO NOT READ] Don't know/Refused") %>%
+    spread(key = response, value = total) %>% 
+    replace_na(list(Und = 0)) %>% 
+    mutate(all = Dem + Rep + Und) %>% 
+      mutate(Dem = Dem/all) %>% 
+      mutate(Rep = Rep/all) %>% 
+      mutate(Und = Und/all) %>% 
+      select(race_eth, Dem, Rep, Und) %>% 
+      ungroup()
+
+Dem_Support <- 
+  nc09 %>% 
+  count(response == "Dem")
+
+RepCount <- nc09 %>% count(response =="Rep") 
+UndCount <- nc09 %>% count(response == "Und")
+
+RepUndDiff <-
+  nc09 %>% 
+  summarize(RepDiff = diff(RepCount - UndCount))
+
+  
+
+```
+
+```{r}
+#Question 2
 
 
-
+nc_09 %>% 
+  gt() %>% 
+  tab_header(title = "Title",
+             subtitle = "Subtitle") %>% 
+  cols_label(
+    race_eth = "Ethnicity",
+    Dem = "DEM.",
+    Rep = "REP.",
+    Und = "UND."
+    ) %>% 
+  fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>% 
+  mutate(race_eth = fct_relevel(race_eth, c("White", "Black", "Hispanic", "Asian", "Other"))) %>% 
+  arrange(race_eth)
+  
 
 ```
 
 Question 1:
+
+There were `r Dem_Support` respondents who supported the Democratic candidate.
+
+There were `r RepDiff` more respondents who favored the Republican candidate than who were Undecided.
+
+There are two gender variables `gender` and `gender_combined`. There are `r ` individuals for whom these variables have different values.
+
+There are `r` respondents listed as "White" under `race_eth` who are not listed as "White" under `file_race_black`.
+
+Question 2:
+
 
